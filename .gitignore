@@ -1,0 +1,20 @@
+# Dependencies
+node_modules/
+
+# Secrets & env
+.env
+server/.env
+*.local
+
+# Captured leads (never commit client PII)
+server/leads.csv
+
+# Logs
+*.log
+npm-debug.log*
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
