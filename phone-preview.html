@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>v3 — Phone Preview</title>
+<style>
+  html,body{margin:0;height:100%;background:#1a1a1a;font-family:system-ui,sans-serif}
+  .stage{min-height:100%;display:flex;flex-direction:column;align-items:center;gap:14px;padding:28px 12px}
+  .label{color:#bbb;font-size:13px;letter-spacing:.04em}
+  .phone{
+    width:390px;height:780px;max-height:88vh;
+    border:12px solid #000;border-radius:44px;overflow:hidden;
+    box-shadow:0 30px 70px -20px rgba(0,0,0,.8);background:#000;
+  }
+  .phone iframe{width:390px;height:100%;border:0;display:block;background:#F3EEE4}
+</style>
+</head>
+<body>
+  <div class="stage">
+    <div class="label">v3 landing page · 390 px phone width (scroll inside)</div>
+    <div class="phone">
+      <iframe src="index-v3.html" title="v3 landing page at phone width"></iframe>
+    </div>
+  </div>
+</body>
+</html>

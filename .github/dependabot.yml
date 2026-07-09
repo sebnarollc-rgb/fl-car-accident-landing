@@ -1,0 +1,19 @@
+version: 2
+updates:
+  # Backend npm dependencies (lead-intake server)
+  - package-ecosystem: "npm"
+    directory: "/server"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 5
+    groups:
+      backend-deps:
+        patterns: ["*"]
+    labels: ["dependencies", "security"]
+
+  # Keep CI actions patched
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    labels: ["dependencies", "ci"]
