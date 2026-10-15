@@ -1,86 +1,52 @@
-# Florida Car Accident — Attorney Connect Landing Page
+# Seal Accident Group: Landing Page and Lead Intake
 
-A fast, mobile-first landing page that connects Florida car accident victims with an attorney as quickly as possible. Built as static HTML/CSS/JS (no build step) with a small Node.js backend for lead intake.
+A fast, bilingual (English and Spanish) landing page for Seal Accident Group, a Miami car accident referral service, plus the Node.js backend that captures and routes every lead.
 
-## What's here
+**Live:** [sealaccidentgroup.com](https://sealaccidentgroup.com)
+**Built by:** [Sebnaro LLC](https://sebnaro.com), 2026
+
+## The page
+
+- Mobile-first, with click-to-call and a sticky call bar on phones
+- One-tap English/Spanish toggle across all copy, form labels and messages
+- Short lead form with inline validation, a honeypot and optional Cloudflare Turnstile spam protection
+- TCPA consent captured with the exact consent text the visitor saw
+- Cookie consent banner, privacy policy and terms pages
+- Security headers and a strict Content-Security-Policy set in `vercel.json`
+- SEO basics: sitemap, robots.txt, Open Graph image
+- Plain HTML, CSS and JavaScript. No framework, no build step
+
+## The lead server (`server/`)
+
+Node.js and Express, run under pm2 behind nginx with Let's Encrypt.
+
+- **Hardening:** helmet, CORS allowlist, global rate limit plus a tighter limit on the lead endpoint
+- **Compliance record:** consent timestamp set by the server, not trusted from the browser
+- **Audit trail:** append-only log of lead events with phone numbers masked
+- **Routing:** emails the intake team and sends the visitor an auto-reply; optional instant alerts by Telegram or SMS (Twilio)
+- **Data hygiene:** leads file is never committed, plus scripts for encrypted backups and retention purges
+- **Tests:** `node --test` suite, run in GitHub Actions on every push along with `npm audit`; Dependabot keeps dependencies current
+
+See [`HARDENING.md`](HARDENING.md) for the full production checklist.
+
+## Layout
 
 ```
-.
-├── index.html          # The landing page
-├── styles.css          # Design system (Trust & Authority: navy + gold)
-├── script.js           # Form validation, async submit, CTA tracking
-├── server/             # VPS lead-intake backend (Node/Express)
-│   ├── server.js
-│   ├── package.json
-│   └── .env.example
-├── .gitignore
-└── README.md
+index-v3.html     Source of the live page
+dist/             Deployed bundle (page, legal pages, vercel.json)
+demo/             Sales demo for a fictional firm, "Gulfline Injury Law"
+server/           Lead intake API, deploy and HTTPS setup scripts, tests
 ```
 
-## Conversion features
+`index.html` and `index-v2.html` are earlier iterations, kept for reference.
 
-- **Click-to-call** everywhere (`tel:` links) — sticky bottom bar on mobile with Call + Text.
-- **Lead form** with inline validation, honeypot anti-spam, and a clear success state.
-- **SMS/text CTA** (`sms:` link) for quick contact.
-- Florida-specific trust content: PIP 14-day rule, statute of limitations, what-to-do-now steps, FAQ.
-- Accessible (WCAG-minded), responsive at 375/768/1024/1440px, respects reduced motion.
-
-## Before going live — replace these placeholders
-
-Search and replace across `index.html` (and `script.js` for the error fallback):
-
-| Placeholder | Replace with |
-|-------------|--------------|
-| `[FIRM NAME]` | Your firm's name |
-| `[PHONE]` | Phone number (used in `tel:` and `sms:` — use a plain number like `+18005551234` for the links) |
-| `[EMAIL]` | Contact email |
-| `[ADDRESS]` | Office address |
-| `YOUR-VPS-DOMAIN.com` | Your backend domain (the form `action` in `index.html`) |
-
-Also update the stats strip and testimonials with your firm's **real, verified** numbers and reviews. The bar/legal language is attorney advertising boilerplate — have your firm review it.
-
-## Deploy the landing page
-
-It's fully static. Host the root folder anywhere:
-
-- **Netlify / Cloudflare Pages / GitHub Pages** — drag-and-drop or connect the repo.
-- **Your VPS** — serve the root with nginx/Caddy.
-
-## Deploy the lead backend (your VPS)
+## Deploying
 
 ```bash
-cd server
-cp .env.example .env        # fill in SMTP + recipient + allowed origins
-npm install
-npm start                   # or run under pm2 / systemd (below)
+# Page
+cd dist && npx vercel --prod
+
+# Lead server
+cd server && cp .env.example .env   # fill in values
+./deploy.sh
 ```
-
-Point the form `action` in `index.html` at `https://your-vps-domain.com/api/lead`.
-
-**Run it persistently with pm2:**
-```bash
-npm install -g pm2
-pm2 start server.js --name lead-server
-pm2 save && pm2 startup
-```
-
-**Reverse proxy (nginx) example:**
-```nginx
-location /api/ {
-    proxy_pass http://127.0.0.1:3001;
-    proxy_set_header Host $host;
-    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-}
-```
-
-Leads are emailed to `LEAD_TO` and also appended to `server/leads.csv` as a backup (gitignored — it contains client PII, never commit it).
-
-## Lead handling & compliance notes
-
-- The form collects consent to be contacted. Keep that checkbox.
-- `leads.csv` and `.env` contain sensitive data and are gitignored. Secure your VPS accordingly.
-- This page is attorney advertising. Confirm all claims, disclaimers, and bar-compliance language with the firm before launch.
-
-## License
-
-Proprietary — for the firm's use. Update as needed.

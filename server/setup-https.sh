@@ -5,7 +5,7 @@
 # with `nginx -t` before reloading. Does NOT touch CampusSublet config.
 #
 # Run on the VPS as root, AFTER you have a domain pointed at this server:
-#   1) Create a DNS A record:  api.YOURDOMAIN.com  ->  5.78.194.199
+#   1) Create a DNS A record:  api.YOURDOMAIN.com  ->  YOUR_VPS_IP
 #   2) Edit the two variables below.
 #   3) sudo bash setup-https.sh
 # =====================================================================

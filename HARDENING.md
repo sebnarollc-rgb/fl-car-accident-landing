@@ -108,12 +108,12 @@ The hardened code lives in `server/`. To push to the VPS (from your Mac, where y
 ```bash
 # 1) copy the updated server files up (excludes node_modules/.env/leads.csv)
 rsync -avz --exclude node_modules --exclude .env --exclude 'leads.csv' --exclude 'audit.log' \
-  "server/" root@5.78.194.199:/opt/lead-server/
+  "server/" root@YOUR_VPS_IP:/opt/lead-server/
 
 # 2) install + restart on the box
-ssh root@5.78.194.199 'cd /opt/lead-server && npm install --omit=dev && pm2 restart lead-server && pm2 save'
+ssh root@YOUR_VPS_IP 'cd /opt/lead-server && npm install --omit=dev && pm2 restart lead-server && pm2 save'
 
 # 3) verify
-ssh root@5.78.194.199 'curl -s http://127.0.0.1:3001/health'
+ssh root@YOUR_VPS_IP 'curl -s http://127.0.0.1:3001/health'
 ```
 This does **not** touch the co-located CampusSublet/PocketBase stack.
