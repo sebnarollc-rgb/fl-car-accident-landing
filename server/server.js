@@ -305,7 +305,90 @@ app.post("/api/lead", limiter, async (req, res) => {
       }
     }
 
-    res.json({ ok: true, emailed, autoReplied });
+    // SMS notification to the firm — best-effort, only when Twilio env vars
+    // are set (TWILIO_SID, TWILIO_AUTH, TWILIO_FROM, SMS_TO). Uses Twilio's
+    // REST API directly via fetch — no extra npm dependency. Like email, a
+    // failure here must NEVER fail the request: the lead is already in the CSV.
+    // Shared one-line alert body used by SMS and Telegram.
+    const alertBody =
+      `New lead — ${FIRM_NAME_EM}\n` +
+      `${lead.name} · ${lead.phone}\n` +
+      (lead.accident_when ? `When: ${lead.accident_when}\n` : "") +
+      (lead.injured ? `Injured: ${lead.injured}\n` : "") +
+      `Reply-to: ${lead.email || "no email"}`;
+
+    let texted = false;
+    if (process.env.TWILIO_SID && process.env.TWILIO_AUTH && process.env.TWILIO_FROM && process.env.SMS_TO) {
+      // SMS_TO may be a comma-separated list of numbers.
+      const smsRecipients = process.env.SMS_TO.split(",").map(x => x.trim()).filter(Boolean);
+      for (const smsTo of smsRecipients) {
+      try {
+        const smsBody = alertBody;
+        const r = await fetch(
+          `https://api.twilio.com/2010-04-01/Accounts/${encodeURIComponent(process.env.TWILIO_SID)}/Messages.json`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/x-www-form-urlencoded",
+              Authorization: "Basic " + Buffer.from(`${process.env.TWILIO_SID}:${process.env.TWILIO_AUTH}`).toString("base64")
+            },
+            body: new URLSearchParams({
+              From: process.env.TWILIO_FROM,
+              To: smsTo,
+              Body: smsBody.slice(0, 1500)
+            }),
+            // Don't let a slow Twilio response hang the submission.
+            signal: AbortSignal.timeout(6000)
+          }
+        );
+        if (r.ok) {
+          texted = true;
+        } else {
+          const errText = await r.text().catch(() => "");
+          console.error(`SMS send failed (${r.status}) — lead is still saved:`, errText.slice(0, 300));
+        }
+      } catch (e) {
+        console.error("SMS send failed (lead is still saved in leads.csv):", e.message);
+      }
+      }
+    }
+
+    // Telegram notification to the intake team — best-effort, only when
+    // TELEGRAM_TOKEN and TELEGRAM_CHAT_ID are set. Free, instant, and needs no
+    // carrier registration. TELEGRAM_CHAT_ID may be a comma-separated list
+    // (a group chat id works too, so the whole team is pinged at once).
+    // Like every other notifier here, a failure must NEVER fail the request.
+    let telegrammed = false;
+    if (process.env.TELEGRAM_TOKEN && process.env.TELEGRAM_CHAT_ID) {
+      const chatIds = process.env.TELEGRAM_CHAT_ID.split(",").map(x => x.trim()).filter(Boolean);
+      for (const chatId of chatIds) {
+        try {
+          const r = await fetch(
+            `https://api.telegram.org/bot${encodeURIComponent(process.env.TELEGRAM_TOKEN)}/sendMessage`,
+            {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                chat_id: chatId,
+                text: alertBody + (lead.details ? `\n\n"${lead.details}"` : ""),
+                disable_web_page_preview: true
+              }),
+              signal: AbortSignal.timeout(6000)
+            }
+          );
+          if (r.ok) {
+            telegrammed = true;
+          } else {
+            const errText = await r.text().catch(() => "");
+            console.error(`Telegram send failed (${r.status}) — lead is still saved:`, errText.slice(0, 300));
+          }
+        } catch (e) {
+          console.error("Telegram send failed (lead is still saved in leads.csv):", e.message);
+        }
+      }
+    }
+
+    res.json({ ok: true, emailed, autoReplied, texted, telegrammed });
   } catch (err) {
     console.error("Lead error:", err);
     res.status(500).json({ ok: false, error: "Server error" });

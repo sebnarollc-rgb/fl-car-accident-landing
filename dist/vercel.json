@@ -11,7 +11,7 @@
         { "key": "Permissions-Policy", "value": "geolocation=(), microphone=(), camera=(), interest-cohort=()" },
         {
           "key": "Content-Security-Policy",
-          "value": "default-src 'self'; img-src 'self' data:; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; script-src 'self' 'unsafe-inline' https://challenges.cloudflare.com https://www.googletagmanager.com https://www.google-analytics.com; frame-src https://challenges.cloudflare.com; connect-src 'self' https://api.sealaccidentgroup.com https://5-78-194-199.sslip.io https://www.google-analytics.com; form-action 'self' https://api.sealaccidentgroup.com https://5-78-194-199.sslip.io; base-uri 'self'; frame-ancestors 'self'"
+          "value": "default-src 'self'; img-src 'self' data:; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; script-src 'self' 'unsafe-inline' https://challenges.cloudflare.com https://www.googletagmanager.com https://www.google-analytics.com; frame-src https://challenges.cloudflare.com; connect-src 'self' https://api.sealaccidentgroup.com https://65-108-223-133.sslip.io https://www.google-analytics.com; form-action 'self' https://api.sealaccidentgroup.com https://65-108-223-133.sslip.io; base-uri 'self'; frame-ancestors 'self'"
         }
       ]
     },

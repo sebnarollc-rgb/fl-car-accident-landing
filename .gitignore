@@ -18,3 +18,8 @@ npm-debug.log*
 Thumbs.db
 .vscode/
 .idea/
+
+# Not part of the site: nested notes vault and private business docs
+Obsidian Vault/
+business/
+.vercel/

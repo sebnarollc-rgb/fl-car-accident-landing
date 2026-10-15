@@ -96,6 +96,9 @@ test("happy-path lead saves to CSV and responds ok (email best-effort)", async (
   assert.strictEqual(r.status, 200);
   assert.strictEqual(j.ok, true);
   assert.strictEqual(j.emailed, false, "no SMTP configured, so emailed must be false but request still ok");
+  // Regression: SMS is best-effort too — with no Twilio config the request
+  // must still succeed and report texted:false (never throw, never block).
+  assert.strictEqual(j.texted, false, "no Twilio configured, so texted must be false but request still ok");
   assert.match(readCsv(), /Jane Doe/);
 });
 
